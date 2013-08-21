@@ -20,16 +20,24 @@ class WekaDataFormat(name: String, classifications: WekaNominalAttributeType, at
     instances
   }
 
-  def generateInstance(attrs: Map[String, String]): Instance = {
+  def generateInstance(attrs: Map[String,String]): Instance = {
     val instance = new SparseInstance(allAttributes.length)
-    for ((k, v) <- attrs) {
+    for( (k, v) <- attrs ) {
       if (attrNameMap.contains(k))
-        instance.setValue(attrNameMap(k), v)
+        try {
+          instance.setValue(attrNameMap(k), v)
+        } catch {
+          case ex: IllegalArgumentException => {
+            throw new IllegalArgumentException(
+              "Tried to set value to '" + v + "' for attribute '" + attrNameMap(k).name + "'", ex)
+          }
+        }
       else
         throw new NoSuchElementException("key " + k + " does not exist in the DataFormat")
     }
     instance
   }
+
 
   def nominalPositionName(name: String, value: Double): String = {
     // rgh, has to be a better way to get WekaAttribute inheritance-like behavior without
@@ -82,7 +90,7 @@ class WekaDataSet(dataFormat: WekaDataFormat) {
     }
     val generatedValues = for ((name, value) <- valueGenerator(header, line)) yield {
       if (!dataFormat.attrNameMap.contains(name))
-        throw new NoSuchElementException("valueGenerator generated something not in the dataset")
+        throw new NoSuchElementException("valueGenerator generated something not in the dataset: " + name)
       (name, value)
     }
     val allValues = Map() ++ fileValues ++ generatedValues

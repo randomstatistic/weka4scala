@@ -1,6 +1,6 @@
-desired	good	meh	likes chili	instanceWeight
-true	true	false	always	2
-true	true	true	sometimes
-false	false	true	never
-false	true	false	allergic
-false	false	true	sometimes
+desired	good	meh	likes chili	stars	instanceWeight
+true	true	false	always	5	2
+true	true	true	sometimes	3
+false	false	true	never	5
+false	true	false	allergic	1
+false	false	true	sometimes	2

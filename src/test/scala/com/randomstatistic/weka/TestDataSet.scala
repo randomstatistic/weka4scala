@@ -10,7 +10,8 @@ class TestDataSet extends FunSuite with BeforeAndAfterEach {
     new WekaDataFormat("df", new WekaBooleanAttribute("desired"), List(
       WekaBooleanAttribute("good"),
       WekaBooleanAttribute("meh"),
-      WekaNominalAttribute("likes chili", List("always", "sometimes", "never", "allergic"))
+      WekaNominalAttribute("likes chili", List("always", "sometimes", "never", "allergic")),
+      WekaNumericAttribute("stars")
     ))
   }
 
@@ -25,7 +26,7 @@ class TestDataSet extends FunSuite with BeforeAndAfterEach {
     var called = false
     ds.valueGenerator = (h: Header, line: Array[String]) => {
       called = true
-      assert(h.name2Col.keys.toList.sorted === List("desired", "good", "instanceWeight", "meh", "likes chili").sorted)
+      assert(h.name2Col.keys.toList.sorted === List("desired", "good", "instanceWeight", "meh", "likes chili", "stars").sorted)
       Map()
     }
     ds.loadFromCSVWithHeader("src/test/resources/chili_header.tsv")
@@ -57,7 +58,8 @@ class TestDataSet extends FunSuite with BeforeAndAfterEach {
       Map(
         "good" -> "false",
         "meh" -> "true",
-        "likes chili" -> "never"))
+        "likes chili" -> "never",
+        "stars" -> "5"))
     testInstance.setDataset(ds)
     //println(c) // if you're curious
     assert("false" === df.classificationName(c.classifyInstance(testInstance)))

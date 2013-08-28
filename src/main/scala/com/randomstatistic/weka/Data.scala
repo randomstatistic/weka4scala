@@ -27,7 +27,10 @@ class WekaDataFormat(name: String, classifications: WekaNominalAttributeType, at
     for ((k, v) <- attrs) {
       if (attrNameMap.contains(k))
         try {
-          instance.setValue(attrNameMap(k), v)
+          attrNameMap(k) match {
+            case WekaNumericAttribute(_) => instance.setValue(attrNameMap(k), v.toDouble)
+            case _ => instance.setValue(attrNameMap(k), v)
+          }
         } catch {
           case ex: IllegalArgumentException => {
             throw new IllegalArgumentException(

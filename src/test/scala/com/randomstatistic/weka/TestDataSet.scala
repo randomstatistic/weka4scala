@@ -25,7 +25,7 @@ class TestDataSet extends FunSuite with BeforeAndAfterEach {
     var called = false
     ds.valueGenerator = (h: Header, line: Array[String]) => {
       called = true
-      assert(h.name2Col.keys.toList.sorted === List("desired", "good", "meh", "likes chili").sorted)
+      assert(h.name2Col.keys.toList.sorted === List("desired", "good", "instanceWeight", "meh", "likes chili").sorted)
       Map()
     }
     ds.loadFromCSVWithHeader("src/test/resources/chili_header.tsv")
@@ -33,6 +33,13 @@ class TestDataSet extends FunSuite with BeforeAndAfterEach {
   }
 
   //TODO: test load without header
+
+  test("set weights") {
+    ds.loadFromCSVWithHeader("src/test/resources/chili_header.tsv")
+    assert(2 === ds.instances.instance(0).weight(), "First instance has weight 2")
+    assert(1 === ds.instances.instance(1).weight(), "Second instance has weight 1")
+  }
+
 
   test("can classify") {
     ds.loadFromCSVWithHeader("src/test/resources/chili_header.tsv")

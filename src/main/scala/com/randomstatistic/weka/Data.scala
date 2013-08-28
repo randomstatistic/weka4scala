@@ -20,9 +20,11 @@ class WekaDataFormat(name: String, classifications: WekaNominalAttributeType, at
     instances
   }
 
-  def generateInstance(attrs: Map[String,String]): Instance = {
+  def generateInstance(attrs: Map[String, String], weight: Double = 1): Instance = {
     val instance = new SparseInstance(allAttributes.length)
-    for( (k, v) <- attrs ) {
+    instance.setWeight(weight)
+
+    for ((k, v) <- attrs) {
       if (attrNameMap.contains(k))
         try {
           instance.setValue(attrNameMap(k), v)
@@ -63,6 +65,7 @@ class WekaDataFormat(name: String, classifications: WekaNominalAttributeType, at
 }
 
 class WekaDataSet(dataFormat: WekaDataFormat) {
+  var weightColName = "instanceWeight"
   val instances = dataFormat.newInstances
   var delinator: String = "\t"
   var normalizer: (String) => String = (s: String) => s.trim
@@ -85,16 +88,26 @@ class WekaDataSet(dataFormat: WekaDataFormat) {
   }
 
   def generateInstance(header: Header, line: Array[String]): Instance = {
-    val fileValues = for (col <- header.name2Col.keys if dataFormat.attrNameMap.contains(col)) yield {
-      (col, line(header.name2Col(col)))
-    }
-    val generatedValues = for ((name, value) <- valueGenerator(header, line)) yield {
-      if (!dataFormat.attrNameMap.contains(name))
-        throw new NoSuchElementException("valueGenerator generated something not in the dataset: " + name)
-      (name, value)
-    }
-    val allValues = Map() ++ fileValues ++ generatedValues
-    val instance = dataFormat.generateInstance(allValues)
+    val weight =
+      if (header.name2Col.contains(weightColName)
+        && !dataFormat.attrNameMap.contains(weightColName)
+        && line.length > header.name2Col(weightColName))
+        line(header.name2Col(weightColName)).toDouble
+      else
+        1
+    val fileValues =
+      for (col <- header.name2Col.keys
+           if dataFormat.attrNameMap.contains(col) && line.length > header.name2Col(col)) yield {
+        (col, line(header.name2Col(col)))
+      }
+    val generatedValues =
+      for ((name, value) <- valueGenerator(header, line)) yield {
+        if (!dataFormat.attrNameMap.contains(name))
+          throw new NoSuchElementException("valueGenerator generated something not in the dataset: " + name)
+        (name, value)
+      }
+    val allValues = generatedValues ++ fileValues
+    val instance = dataFormat.generateInstance(allValues, weight)
     instance
   }
 }

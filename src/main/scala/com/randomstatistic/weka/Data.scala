@@ -6,7 +6,7 @@ import WekaConversions._
 import java.io.File
 import java.util
 
-class WekaDataFormat(name: String, classifications: WekaNominalAttributeType, attributes: List[WekaAttributeType]) {
+case class WekaDataFormat(name: String, classifications: WekaNominalAttributeType, attributes: List[WekaAttributeType]) {
 
   val allAttributes = classifications :: attributes
   lazy val attrNameMap = allAttributes.map((a) => (a.name, a)).toMap
